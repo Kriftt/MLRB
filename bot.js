@@ -12,6 +12,7 @@ const {
   Partials,
   MessageFlags
 } = require('discord.js');
+const http = require('http');  // Add the http module for listening on a port
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -43,7 +44,7 @@ const commands = [
       option.setName('team')
         .setDescription('The team to offer')
         .setRequired(true)
-        .addChoices(...teams.map(t => ({ name: t, value: t }))))
+        .addChoices(...teams.map(t => ({ name: t, value: t })))),
 ];
 
 const commandData = commands.map(command => command.toJSON());
@@ -64,6 +65,15 @@ const rest = new REST({ version: '10' }).setToken(TOKEN);
 
 client.once('ready', () => {
   console.log(`Logged in as ${client.user.tag}`);
+});
+
+// Add an HTTP server that listens on a port (required for Render)
+const port = process.env.PORT || 3000;  // Use the port provided by Render or fallback to 3000
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is running!');
+}).listen(port, () => {
+  console.log(`Server is listening on port ${port}`);
 });
 
 client.on('interactionCreate', async interaction => {
